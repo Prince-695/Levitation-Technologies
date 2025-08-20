@@ -58,7 +58,7 @@ const invoiceSchema = Joi.object({
         name: Joi.string().required(),
         quantity: Joi.number().min(1).required(),
         rate: Joi.number().min(0).required(),
-        totalAmount: Joi.number().min(0).required()
+        totalAmount: Joi.number().min(0).optional()
       })
     )
     .required()
@@ -69,7 +69,7 @@ const invoiceSchema = Joi.object({
     totalCharges: Joi.number().min(0).required(),
     gst: Joi.number().min(0).required(),
     finalAmount: Joi.number().min(0).required()
-  }).required()
+  }).optional()
 });
 
 // Validation middleware function
