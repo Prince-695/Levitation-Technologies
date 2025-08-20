@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:5001/api';
+const BASE_URL = 'http://localhost:5000/api';
 
 // Test data
 const testUser = {
@@ -30,7 +30,7 @@ let userId = '';
 async function testHealthCheck() {
   try {
     console.log('🏥 Testing Health Check...');
-    const response = await axios.get('http://localhost:5001/health');
+    const response = await axios.get('http://localhost:5000/health');
     console.log('✅ Health Check Response:', response.data);
     return true;
   } catch (error) {
