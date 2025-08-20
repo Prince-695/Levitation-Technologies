@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+        }
+        
+        .header-left h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .header-left p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+        
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .customer-info {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .customer-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .customer-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .value {
+            color: #34495e;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .products-table th {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .products-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            color: #2c3e50;
+        }
+        
+        .products-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .products-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .summary {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .summary-row:last-child {
+            margin-bottom: 0;
+            border-top: 2px solid #3498db;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .summary-row.total .amount {
+            color: #3498db;
+            font-size: 24px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #7f8c8d;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .invoice-number {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-left">
+                <h1>INVOICE GENERATOR</h1>
+                <p>Sample Output should be like this</p>
+            </div>
+            <div class="header-right">
+                <div class="logo">
+                    <div class="logo-icon">⬢</div>
+                    <div class="logo-text">Levitation</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Information -->
+        <div class="customer-info">
+            <div class="customer-row">
+                <span class="label">Invoice Number:</span>
+                <span class="value invoice-number">{{invoiceNumber}}</span>
+            </div>
+            <div class="customer-row">
+                <span class="label">To:</span>
+                <span class="value">{{customerName}}</span>
+            </div>
+            <div class="customer-row">
+                <span class="label">Email:</span>
+                <span class="value">{{customerEmail}}</span>
+            </div>
+            <div class="customer-row">
+                <span class="label">Date:</span>
+                <span class="value">{{invoiceDate}}</span>
+            </div>
+        </div>
+        
+        <!-- Products Table -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-right">Rate</th>
+                    <th class="text-right">Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each products}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td class="text-center">{{quantity}}</td>
+                    <td class="text-right">₹{{rate}}</td>
+                    <td class="text-right">₹{{totalAmount}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        
+        <!-- Summary Section -->
+        <div class="summary">
+            <div class="summary-row">
+                <span>Total Charges:</span>
+                <span>₹{{totalCharges}}</span>
+            </div>
+            <div class="summary-row">
+                <span>GST (18%):</span>
+                <span>₹{{gst}}</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Amount:</span>
+                <span class="amount">₹{{finalAmount}}</span>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>We are pleased to provide any further information you may require and look forward to assisting with your next order. This invoice has been generated electronically and is valid without a signature.</p>
+            <p style="margin-top: 10px;"><strong>Date:</strong> {{currentDate}}</p>
+        </div>
+    </div>
+</body>
+</html>
