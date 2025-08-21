@@ -4,41 +4,25 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-// Import configurations
 const connectDB = require('./src/config/database');
-
-// Import routes
 const authRoutes = require('./src/routes/authRoutes');
 const invoiceRoutes = require('./src/routes/invoiceRoutes');
-
-// Import middlewares
 const errorHandler = require('./src/middlewares/errorHandler');
 
-// Initialize Express app
 const app = express();
 
 // Connect to database
 connectDB();
 
-// Trust proxy (for rate limiting behind reverse proxy)
+// Security & Rate limiting
 app.set('trust proxy', 1);
-
-// Rate limiting
-const limiter = rateLimit({
+app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  },
+  max: 100,
+  message: { success: false, message: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
-});
-
-// Apply rate limiting to all requests
-app.use(limiter);
-
-// Security middleware
+}));
 app.use(helmet());
 
 // CORS configuration
@@ -49,11 +33,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Body parsing middleware
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check route
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -67,15 +51,12 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 
-// Handle 404 routes
+// 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`
-  });
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// Error handling middleware (must be last)
+// Error handling middleware
 app.use(errorHandler);
 
 module.exports = app;
