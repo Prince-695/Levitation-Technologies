@@ -20,9 +20,8 @@ const schemas = {
         name: Joi.string().required(),
         quantity: Joi.number().min(1).required(),
         rate: Joi.number().min(0).required(),
-        totalAmount: Joi.number().min(0).optional()
+        totalAmount: Joi.number().min(0).required()
       })
-
     ).required(),
     summary: Joi.object({
       totalCharges: Joi.number().min(0).required(),
