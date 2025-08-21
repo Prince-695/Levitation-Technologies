@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import Header from './components/header';
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <div className="App">
+          <Header />
           <Routes>
             <Route 
               path="/login" 

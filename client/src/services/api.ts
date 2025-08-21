@@ -43,7 +43,6 @@ export const authAPI = {
     fullName: string;
     email: string;
     password: string;
-    confirmPassword: string;
   }) => {
     const response = await api.post('/auth/register', userData);
     return response.data;
@@ -52,6 +51,19 @@ export const authAPI = {
   login: async (credentials: { email: string; password: string }) => {
     const response = await api.post('/auth/login', credentials);
     return response.data;
+  },
+
+  logout: async () => {
+    // For JWT-based auth, logout is mainly client-side
+    // Clear token from localStorage and redirect
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // If server had a logout endpoint, we would call it here:
+    // const response = await api.post('/auth/logout');
+    // return response.data;
+    
+    return { success: true, message: 'Logged out successfully' };
   },
 
   getProfile: async () => {

@@ -1,108 +1,83 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import type { LoginForm } from '../types';
+import { useEffect, useRef } from "react";
+import AuthForm from "./Authform";
+import frameA from "../assets/frameA.png";
+import frameB from "../assets/frameB.png";
 
 export default function Login() {
-  const [formData, setFormData] = useState<LoginForm>({
-    email: '',
-    password: '',
-  });
-  const [errors, setErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const trackRef = useRef(null);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    let x = 0;                          // current translateX
+    const SPEED = 0.35;                 // px per frame (slow + smooth)
+    let rafId;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors([]);
+    // helper: width including horizontal margins
+    const totalWidth = (el) => {
+      const cs = getComputedStyle(el);
+      const ml = parseFloat(cs.marginLeft) || 0;
+      const mr = parseFloat(cs.marginRight) || 0;
+      return el.offsetWidth + ml + mr;
+    };
 
-    try {
-      const response = await authAPI.login(formData);
-      
-      if (response.success && response.token && response.user) {
-        login(response.user, response.token);
-        navigate('/dashboard');
-      } else {
-        setErrors([response.message || 'Login failed']);
+    const step = () => {
+      x -= SPEED;
+      track.style.transform = `translateX(${x}px)`;
+
+      // When the first child is fully out of view, move it to the end
+      const first = track.children[0];
+      if (first) {
+        const w = totalWidth(first);
+        // If we've shifted past the first element's full width, recycle it
+        if (-x >= w) {
+          track.appendChild(first);   // put first at the end
+          x += w;                     // compensate so there's no jump
+          track.style.transform = `translateX(${x}px)`;
+        }
       }
-    } catch (error: unknown) {
-      const errorMessages = (error as { response?: { data?: { errors?: string[], message?: string } } }).response?.data?.errors || [
-        (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'An error occurred during login',
-      ];
-      setErrors(errorMessages);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      rafId = requestAnimationFrame(step);
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h1>Login</h1>
-      
-      {errors.length > 0 && (
-        <div style={{ color: 'red', marginBottom: '20px' }}>
-          {errors.map((error, index) => (
-            <div key={index}>{error}</div>
-          ))}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: loading ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
+    <div className="flex h-full w-full items-center justify-center overflow-hidden mt-16">
+      {/* Slider Section */}
+      <div className="xl:flex w-1/2 flex-row items-center justify-center overflow-hidden hidden">
+        <div
+          ref={trackRef}
+          className="flex items-center will-change-transform"
+          style={{ transform: "translateX(0px)" }}
         >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+          {/* Give each image a stable index */}
+          <img
+            src={frameA}
+            alt="hello"
+            height={600}
+            width={400}
+            data-index="0"
+            className="m-5"
+          />
+          <img
+            src={frameB}
+            alt="world"
+            height={600}
+            width={400}
+            data-index="1"
+            className="m-5"
+          />
+        </div>
+      </div>
 
-      <p style={{ marginTop: '20px', textAlign: 'center' }}>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
+      {/* Auth Form */}
+      <div className="flex w-1/2 items-center justify-center ml-5">
+        <AuthForm mode="login" />
+      </div>
     </div>
   );
 }
