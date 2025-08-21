@@ -1,13 +1,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import { authAPI } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
   login: (user: User, token: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -55,7 +56,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Continue with logout even if API call fails
+    }
+    
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');

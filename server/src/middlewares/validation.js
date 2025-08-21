@@ -5,8 +5,7 @@ const schemas = {
   register: Joi.object({
     fullName: Joi.string().trim().min(2).max(50).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+    password: Joi.string().min(6).required()
   }),
   
   login: Joi.object({
@@ -33,13 +32,16 @@ const schemas = {
 
 // Simplified validation middleware
 const validate = (schemaName) => (req, res, next) => {
+  console.log(`Validating ${schemaName} with data:`, req.body); // Debug log
   const { error } = schemas[schemaName].validate(req.body, { abortEarly: false });
   if (error) {
+    console.log('Validation error:', error.details); // Debug log
     return res.status(400).json({
       success: false,
       message: error.details.map(d => d.message).join(', ')
     });
   }
+  console.log(`${schemaName} validation passed`); // Debug log
   next();
 };
 
