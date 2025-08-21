@@ -5,7 +5,7 @@ import frameC from "../assets/frameC.png";
 //   return <AuthForm mode="login" />;
 // }
 
-export default function Login() {
+export default function Register() {
   return (
     <div className='flex h-full overflow-hidden w-full mt-12'>
       <div className='flex w-1/2 flex-row items-center justify-center ml-16'>

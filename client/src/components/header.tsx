@@ -1,7 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png'; // Adjust the path as necessary
-
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -55,12 +54,12 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <div className="hidden sm:block text-gray-700 text-sm">
+                <div className="hidden sm:block text-gray-200 text-md">
                   Welcome, <span className="font-medium">{user?.fullName}</span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  className="bg-[#ccf575] text-[##292C20] px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   Logout
                 </button>
@@ -70,17 +69,17 @@ const Header = () => {
                 {location.pathname === '/register' ? (
                   <button
                     onClick={handleLogin}
-                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    className="bg-[#ccf575] hover:bg-[#ccf575] text-[##292C20] px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 "
                   >
                     Login
                   </button>
                 ) : location.pathname === '/login' ? (
-                  <button
+                    <button
                     onClick={handleRegister}
-                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                  >
-                    Register
-                  </button>
+                    className="bg-transparent border-2 border-[#ccf575] text-[#ccf575] px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 "
+                    >
+                    Connecting to people with Technology
+                    </button>
                 ) : (
                   <>
                     <button

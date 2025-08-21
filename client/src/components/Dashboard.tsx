@@ -1,52 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 import { invoiceAPI } from '../services/api';
 import type { SimpleProduct } from '../types';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
   const [products, setProducts] = useState<SimpleProduct[]>([]);
   const [newProduct, setNewProduct] = useState<SimpleProduct>({
     name: '',
     qty: 1,
     rate: 0,
   });
-  const [showAddProduct, setShowAddProduct] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    // Initialize with empty products array for MVP
-    setProducts([]);
-  }, []);
 
   const handleAddProduct = () => {
     if (newProduct.name.trim() && newProduct.rate > 0) {
       setProducts([...products, { ...newProduct, id: Date.now() }]);
       setNewProduct({ name: '', qty: 1, rate: 0 });
-      setShowAddProduct(false);
     }
-  };
-
-  const handleEditProduct = (index: number) => {
-    setEditingProduct(index);
-    setNewProduct(products[index]);
-  };
-
-  const handleUpdateProduct = () => {
-    if (editingProduct !== null && newProduct.name.trim() && newProduct.rate > 0) {
-      const updatedProducts = [...products];
-      updatedProducts[editingProduct] = newProduct;
-      setProducts(updatedProducts);
-      setEditingProduct(null);
-      setNewProduct({ name: '', qty: 1, rate: 0 });
-    }
-  };
-
-  const handleDeleteProduct = (index: number) => {
-    const updatedProducts = products.filter((_, i) => i !== index);
-    setProducts(updatedProducts);
   };
 
   const calculateTotal = () => {
@@ -83,7 +53,6 @@ export default function Dashboard() {
       const response = await invoiceAPI.generatePDF(invoiceData);
       
       if (response.data) {
-        // Create blob and download
         const blob = new Blob([response.data], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -107,152 +76,109 @@ export default function Dashboard() {
   const totals = calculateTotal();
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '20px auto', padding: '20px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1>Invoice Generator Dashboard</h1>
-        <div>
-          <span style={{ marginRight: '15px' }}>Welcome, {user?.fullName}</span>
-          <button onClick={logout} style={{ padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', cursor: 'pointer' }}>
-            Logout
-          </button>
-        </div>
-      </div>
+    <div className="h-full overflow-hidden mx-40 text-white">
+        {/* Add Products Section */}
+        <div className="mb-8 mt-20">
+          <h1 className="text-4xl font-bold mb-2">Add Products</h1>
+          <p className="text-gray-400 mb-8">
+            This is basic login page which is used for levitation assignment purpose.
+          </p>
 
-      {error && (
-        <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', marginBottom: '20px', borderRadius: '4px' }}>
-          {error}
-        </div>
-      )}
-
-      {/* Add Product Section */}
-      <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h2>Products</h2>
-          <button
-            onClick={() => setShowAddProduct(!showAddProduct)}
-            style={{ padding: '8px 16px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}
-          >
-            {showAddProduct ? 'Cancel' : 'Add Product'}
-          </button>
-        </div>
-
-        {(showAddProduct || editingProduct !== null) && (
-          <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '10px', alignItems: 'end' }}>
-              <div>
-                <label>Product Name:</label>
-                <input
-                  type="text"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
-              <div>
-                <label>Quantity:</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newProduct.qty}
-                  onChange={(e) => setNewProduct({ ...newProduct, qty: parseInt(e.target.value) || 1 })}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
-              <div>
-                <label>Rate (₹):</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={newProduct.rate}
-                  onChange={(e) => setNewProduct({ ...newProduct, rate: parseFloat(e.target.value) || 0 })}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
-              <div>
-                <button
-                  onClick={editingProduct !== null ? handleUpdateProduct : handleAddProduct}
-                  style={{ padding: '8px 16px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}
-                >
-                  {editingProduct !== null ? 'Update' : 'Add'}
-                </button>
-              </div>
+          {/* Product Form */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div>
+              <label className="block text-sm font-medium mb-2">Product Name</label>
+              <input
+                type="text"
+                placeholder="Enter the product name"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                className="w-full  border border-gray-700 rounded px-3 py-2 text-white placeholder-gray-400"
+              />
             </div>
-          </div>
-        )}
-
-        {/* Products List */}
-        {products.length === 0 ? (
-          <p>No products added yet. Add your first product to generate an invoice.</p>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-            <thead>
-              <tr style={{ background: '#f8f9fa' }}>
-                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Product Name</th>
-                <th style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>Qty</th>
-                <th style={{ padding: '10px', textAlign: 'right', border: '1px solid #ddd' }}>Rate (₹)</th>
-                <th style={{ padding: '10px', textAlign: 'right', border: '1px solid #ddd' }}>Amount (₹)</th>
-                <th style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product, index) => (
-                <tr key={product.id || index}>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{product.name}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{product.qty}</td>
-                  <td style={{ padding: '10px', textAlign: 'right', border: '1px solid #ddd' }}>₹{product.rate.toFixed(2)}</td>
-                  <td style={{ padding: '10px', textAlign: 'right', border: '1px solid #ddd' }}>₹{(product.qty * product.rate).toFixed(2)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>
-                    <button
-                      onClick={() => handleEditProduct(index)}
-                      style={{ padding: '4px 8px', marginRight: '5px', background: '#ffc107', color: 'black', border: 'none', cursor: 'pointer' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(index)}
-                      style={{ padding: '4px 8px', background: '#dc3545', color: 'white', border: 'none', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {/* Invoice Summary */}
-        {products.length > 0 && (
-          <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '4px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ marginBottom: '5px' }}>Subtotal: ₹{totals.subtotal.toFixed(2)}</div>
-              <div style={{ marginBottom: '5px' }}>GST (18%): ₹{totals.gstAmount.toFixed(2)}</div>
-              <div style={{ fontWeight: 'bold', fontSize: '18px', borderTop: '1px solid #ddd', paddingTop: '5px' }}>
-                Total: ₹{totals.total.toFixed(2)}
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Product Price</label>
+              <input
+                type="number"
+                placeholder="Enter the price"
+                value={newProduct.rate || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, rate: parseFloat(e.target.value) || 0 })}
+                className="w-full  border  rounded px-3 py-2 text-white placeholder-gray-400"
+              />
             </div>
-            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+            <div>
+              <label className="block text-sm font-medium mb-2">Quantity</label>
+              <input
+                type="number"
+                placeholder="Enter the Qty"
+                min="1"
+                value={newProduct.qty || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, qty: parseInt(e.target.value) || 1 })}
+                className="w-full border rounded px-3 py-2 text-white placeholder-gray-400"
+              />
+            </div>
+            <div className="flex items-end">
               <button
-                onClick={handleGenerateInvoice}
-                disabled={loading}
-                style={{
-                  padding: '12px 24px',
-                  background: loading ? '#ccc' : '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  fontSize: '16px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  borderRadius: '4px',
-                }}
+                onClick={handleAddProduct}
+                className="w-full bg-[#ccf575] text-black py-2 px-4 rounded font-medium flex items-center justify-center"
               >
-                {loading ? 'Generating Invoice...' : 'Generate Invoice PDF'}
+                Add Product
+                <span className="ml-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm">+</span>
               </button>
             </div>
           </div>
-        )}
+
+          {/* Products Table */}
+          <div className=" rounded-lg overflow-hidden border-2 border-[#1f1f1f]">
+            <table className="w-full">
+              <thead className="bg-[#1f1f1f]">
+                <tr>
+                  <th className="text-left py-3 px-4 font-medium">
+                    Product name 
+                    <span className="inline-block ml-1 text-gray-400">↕</span>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">Price</th>
+                  <th className="text-left py-3 px-4 font-medium">
+                    Quantity 
+                    <span className="inline-block ml-1 text-gray-400">↕</span>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product, index) => (
+                  <tr key={product.id || index}>
+                    <td className="py-3 px-4 text-gray-300">({product.name})</td>
+                    <td className="py-3 px-4">{product.rate}</td>
+                    <td className="py-3 px-4">{product.qty}</td>
+                    <td className="py-3 px-4">INR {(product.qty * product.rate).toFixed(0)}</td>
+                  </tr>
+                ))}
+                
+                {/* Summary Rows */}
+                <tr className="border-t border-gray-600">
+                  <td colSpan={3} className="py-3 px-4 text-right font-medium">Sub-Total</td>
+                  <td className="py-3 px-4 font-medium">INR {totals.subtotal.toFixed(1)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={3} className="py-3 px-4 text-right font-medium">Incl + GST 18%</td>
+                  <td className="py-3 px-4 font-medium">INR {totals.total.toFixed(1)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Generate PDF Button */}
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleGenerateInvoice}
+              disabled={loading || products.length === 0}
+              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-black px-8 py-3 rounded font-medium"
+            >
+              {loading ? 'Generating...' : 'Generate PDF Invoice'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
   );
 }
