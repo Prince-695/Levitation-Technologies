@@ -3,8 +3,8 @@ services:
     name: invoice-generator-backend
     env: node
     plan: free
-    buildCommand: npm install -g pnpm && pnpm install && pnpm dlx puppeteer browsers install chrome
-    startCommand: pnpm start
+    buildCommand: npm ci && npx puppeteer browsers install chrome
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
