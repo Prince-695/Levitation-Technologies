@@ -17,7 +17,6 @@ class PDFService {
       htmlTemplate = this.replacePlaceholders(htmlTemplate, invoiceData);
       
       // Launch puppeteer
-      const isProduction = process.env.NODE_ENV === 'production';
       const puppeteerConfig = {
         headless: 'new',
         args: [
@@ -31,11 +30,7 @@ class PDFService {
         ]
       };
 
-      // On local development, don't specify executablePath to use system Chrome
-      // On production (Render), use the downloaded Chrome
-      if (isProduction) {
-        puppeteerConfig.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome';
-      }
+      // Let puppeteer auto-detect Chrome installation
 
       browser = await puppeteer.launch(puppeteerConfig);
       
@@ -62,7 +57,23 @@ class PDFService {
       
     } catch (error) {
       console.error('PDF generation error:', error);
-      throw new Error('Failed to generate PDF');
+      console.error('Error stack:', error.stack);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        code: error.code
+      });
+      
+      // Provide more specific error messages
+      if (error.message.includes('Failed to launch')) {
+        throw new Error('Failed to launch browser for PDF generation. Chrome may not be installed properly.');
+      } else if (error.message.includes('Navigation timeout')) {
+        throw new Error('PDF generation timed out. Template may be too complex.');
+      } else if (error.message.includes('Protocol error')) {
+        throw new Error('Browser communication error during PDF generation.');
+      } else {
+        throw new Error(`PDF generation failed: ${error.message}`);
+      }
     } finally {
       if (browser) {
         await browser.close();

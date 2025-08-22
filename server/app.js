@@ -47,6 +47,29 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Puppeteer health check
+app.get('/health/puppeteer', async (req, res) => {
+  try {
+    const puppeteer = require('puppeteer');
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    await browser.close();
+    res.status(200).json({
+      success: true,
+      message: 'Puppeteer is working!',
+      executablePath: puppeteer.executablePath()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Puppeteer is not working',
+      error: error.message
+    });
+  }
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
