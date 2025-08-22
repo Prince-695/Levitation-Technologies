@@ -4,7 +4,7 @@ import frameA from "../assets/frameA.png";
 import frameB from "../assets/frameB.png";
 
 export default function Login() {
-  const trackRef = useRef(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -12,10 +12,10 @@ export default function Login() {
 
     let x = 0;                          // current translateX
     const SPEED = 0.35;                 // px per frame (slow + smooth)
-    let rafId;
+    let rafId: number;
 
     // helper: width including horizontal margins
-    const totalWidth = (el) => {
+    const totalWidth = (el: HTMLElement) => {
       const cs = getComputedStyle(el);
       const ml = parseFloat(cs.marginLeft) || 0;
       const mr = parseFloat(cs.marginRight) || 0;
@@ -27,7 +27,7 @@ export default function Login() {
       track.style.transform = `translateX(${x}px)`;
 
       // When the first child is fully out of view, move it to the end
-      const first = track.children[0];
+      const first = track.children[0] as HTMLElement;
       if (first) {
         const w = totalWidth(first);
         // If we've shifted past the first element's full width, recycle it

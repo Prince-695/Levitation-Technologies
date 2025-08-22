@@ -168,6 +168,13 @@ export default function Dashboard() {
             </table>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded text-red-400">
+              {error}
+            </div>
+          )}
+
           {/* Generate PDF Button */}
           <div className="mt-8 text-center">
             <button
