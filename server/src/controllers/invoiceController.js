@@ -14,8 +14,28 @@ const sendPDF = (res, pdfBuffer, invoiceNumber) => {
 // @access  Private
 const generatePDF = async (req, res) => {
   try {
+    console.log('=== PDF Generation Request ===');
+    console.log('Request body:', req.body);
+    console.log('User:', req.user ? { id: req.user._id, email: req.user.email } : 'No user found');
+    
     const { products, summary } = req.body;
     const user = req.user;
+    
+    if (!user) {
+      console.error('No user found in request');
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
+    
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      console.error('No products provided or invalid products array');
+      return res.status(400).json({
+        success: false,
+        message: 'Products array is required and must not be empty'
+      });
+    }
     
     // Calculate totals for each product
     products.forEach(product => {
@@ -35,18 +55,27 @@ const generatePDF = async (req, res) => {
       invoiceDate: PDFService.formatDate()
     };
     
+    console.log('Invoice data prepared:', { 
+      invoiceNumber: invoiceData.invoiceNumber, 
+      productsCount: products.length,
+      finalAmount: invoiceData.finalAmount 
+    });
+    
     const pdfBuffer = await PDFService.generateInvoicePDF(invoiceData);
+    console.log('PDF generated successfully, size:', pdfBuffer.length);
     
     // Save invoice to database
     await Invoice.create({
       userId: user._id,
       ...invoiceData
     });
+    console.log('Invoice saved to database');
     
     sendPDF(res, pdfBuffer, invoiceData.invoiceNumber);
     
   } catch (error) {
     console.error('Generate PDF error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Server error during PDF generation',

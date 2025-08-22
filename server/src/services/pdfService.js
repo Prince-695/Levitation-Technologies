@@ -17,7 +17,8 @@ class PDFService {
       htmlTemplate = this.replacePlaceholders(htmlTemplate, invoiceData);
       
       // Launch puppeteer
-      browser = await puppeteer.launch({
+      const isProduction = process.env.NODE_ENV === 'production';
+      const puppeteerConfig = {
         headless: 'new',
         args: [
           '--no-sandbox',
@@ -28,7 +29,15 @@ class PDFService {
           '--no-zygote',
           '--single-process'
         ]
-      });
+      };
+
+      // On local development, don't specify executablePath to use system Chrome
+      // On production (Render), use the downloaded Chrome
+      if (isProduction) {
+        puppeteerConfig.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome';
+      }
+
+      browser = await puppeteer.launch(puppeteerConfig);
       
       const page = await browser.newPage();
       
