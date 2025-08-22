@@ -40,7 +40,7 @@ class PDFService {
           '--single-process',
           '--disable-background-timer-throttling',
           '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding'
+          '--disable-renderer-backgrounding',
         ]
       };
 
@@ -86,7 +86,10 @@ class PDFService {
 
       console.log('PDFService: Puppeteer config:', puppeteerConfig);
       
-      browser = await puppeteer.launch(puppeteerConfig);
+      browser = await puppeteer.launch({
+        headless: true,
+        executablePath: puppeteerConfig.executablePath,
+      });
       console.log('PDFService: Browser launched successfully');
       
       const page = await browser.newPage();
