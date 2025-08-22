@@ -15,8 +15,9 @@ const sendPDF = (res, pdfBuffer, invoiceNumber) => {
 const generatePDF = async (req, res) => {
   try {
     console.log('=== PDF Generation Request ===');
-    console.log('Request body:', req.body);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
     console.log('User:', req.user ? { id: req.user._id, email: req.user.email } : 'No user found');
+    console.log('Environment:', process.env.NODE_ENV);
     
     const { products, summary } = req.body;
     const user = req.user;
@@ -36,6 +37,8 @@ const generatePDF = async (req, res) => {
         message: 'Products array is required and must not be empty'
       });
     }
+    
+    console.log('Starting PDF generation process...');
     
     // Calculate totals for each product
     products.forEach(product => {
@@ -61,10 +64,12 @@ const generatePDF = async (req, res) => {
       finalAmount: invoiceData.finalAmount 
     });
     
+    console.log('Calling PDFService.generateInvoicePDF...');
     const pdfBuffer = await PDFService.generateInvoicePDF(invoiceData);
     console.log('PDF generated successfully, size:', pdfBuffer.length);
     
     // Save invoice to database
+    console.log('Saving invoice to database...');
     await Invoice.create({
       userId: user._id,
       ...invoiceData
@@ -74,12 +79,16 @@ const generatePDF = async (req, res) => {
     sendPDF(res, pdfBuffer, invoiceData.invoiceNumber);
     
   } catch (error) {
-    console.error('Generate PDF error:', error);
+    console.error('=== PDF Generation Error ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
+    console.error('Error details:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Server error during PDF generation',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };

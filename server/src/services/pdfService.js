@@ -9,14 +9,22 @@ class PDFService {
     let browser;
     
     try {
+      console.log('PDFService: Starting PDF generation...');
+      
       // Read HTML template
       const templatePath = path.join(__dirname, '../templates/invoiceTemplate.html');
+      console.log('PDFService: Reading template from:', templatePath);
+      
       let htmlTemplate = await fs.readFile(templatePath, 'utf8');
+      console.log('PDFService: Template read successfully, length:', htmlTemplate.length);
       
       // Replace placeholders with actual data
+      console.log('PDFService: Replacing placeholders...');
       htmlTemplate = this.replacePlaceholders(htmlTemplate, invoiceData);
+      console.log('PDFService: Placeholders replaced successfully');
       
       // Launch puppeteer
+      console.log('PDFService: Launching Puppeteer...');
       const puppeteerConfig = {
         headless: 'new',
         args: [
@@ -31,17 +39,23 @@ class PDFService {
       };
 
       // Let puppeteer auto-detect Chrome installation
-
+      console.log('PDFService: Puppeteer config:', puppeteerConfig);
+      
       browser = await puppeteer.launch(puppeteerConfig);
+      console.log('PDFService: Browser launched successfully');
       
       const page = await browser.newPage();
+      console.log('PDFService: New page created');
       
       // Set page content
+      console.log('PDFService: Setting page content...');
       await page.setContent(htmlTemplate, {
         waitUntil: 'networkidle0'
       });
+      console.log('PDFService: Page content set successfully');
       
       // Generate PDF
+      console.log('PDFService: Generating PDF...');
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
@@ -52,31 +66,39 @@ class PDFService {
           right: '20px'
         }
       });
+      console.log('PDFService: PDF generated successfully, buffer size:', pdfBuffer.length);
       
       return pdfBuffer;
       
     } catch (error) {
-      console.error('PDF generation error:', error);
-      console.error('Error stack:', error.stack);
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        code: error.code
-      });
+      console.error('PDFService: PDF generation error occurred');
+      console.error('PDFService: Error name:', error.name);
+      console.error('PDFService: Error message:', error.message);
+      console.error('PDFService: Error stack:', error.stack);
+      console.error('PDFService: Error code:', error.code);
       
       // Provide more specific error messages
       if (error.message.includes('Failed to launch')) {
+        console.error('PDFService: Browser launch failed');
         throw new Error('Failed to launch browser for PDF generation. Chrome may not be installed properly.');
       } else if (error.message.includes('Navigation timeout')) {
+        console.error('PDFService: Navigation timeout occurred');
         throw new Error('PDF generation timed out. Template may be too complex.');
       } else if (error.message.includes('Protocol error')) {
+        console.error('PDFService: Browser protocol error');
         throw new Error('Browser communication error during PDF generation.');
+      } else if (error.code === 'ENOENT') {
+        console.error('PDFService: File not found error');
+        throw new Error('Template file not found or inaccessible.');
       } else {
+        console.error('PDFService: Unknown error occurred');
         throw new Error(`PDF generation failed: ${error.message}`);
       }
     } finally {
       if (browser) {
+        console.log('PDFService: Closing browser...');
         await browser.close();
+        console.log('PDFService: Browser closed successfully');
       }
     }
   }
