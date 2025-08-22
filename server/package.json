@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "build": "pnpm install && pnpm dlx puppeteer browsers install chrome && echo 'Build complete'",
     "render-build": "npm ci && npx puppeteer browsers install chrome",
+    "postinstall": "npx puppeteer browsers install chrome",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

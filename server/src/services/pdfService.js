@@ -1,12 +1,14 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 
 class PDFService {
   
-  // Generate PDF from invoice data
-  static async generateInvoicePDF(invoiceData) {
+  // Generate PDF from invoice data with retry logic
+  static async generateInvoicePDF(invoiceData, retryCount = 0) {
     let browser;
+    const maxRetries = 2;
     
     try {
       console.log('PDFService: Starting PDF generation...');
@@ -27,6 +29,7 @@ class PDFService {
       console.log('PDFService: Launching Puppeteer...');
       const puppeteerConfig = {
         headless: 'new',
+        timeout: 30000,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -34,11 +37,53 @@ class PDFService {
           '--disable-gpu',
           '--no-first-run',
           '--no-zygote',
-          '--single-process'
+          '--single-process',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
         ]
       };
 
-      // Let puppeteer auto-detect Chrome installation
+      // For production environments, try to use the installed Chrome
+      if (process.env.NODE_ENV === 'production') {
+        // Check if Puppeteer executable path is set via environment
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+          puppeteerConfig.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+          console.log('PDFService: Using Chrome from PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
+        } else {
+          // Try different Chrome executable paths for different hosting services
+          const possibleChromePaths = [
+            '/opt/render/.cache/puppeteer/chrome/linux-121.0.6167.85/chrome-linux64/chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            process.env.CHROME_BIN,
+            process.env.GOOGLE_CHROME_BIN
+          ];
+          
+          for (const chromePath of possibleChromePaths) {
+            if (chromePath) {
+              try {
+                if (fsSync.existsSync(chromePath)) {
+                  puppeteerConfig.executablePath = chromePath;
+                  console.log('PDFService: Using Chrome at:', chromePath);
+                  break;
+                }
+              } catch (err) {
+                console.log('PDFService: Chrome path check failed for:', chromePath);
+              }
+            }
+          }
+          
+          // If no system Chrome found, don't set executablePath 
+          // Let Puppeteer use its own bundled Chrome from the cache
+          if (!puppeteerConfig.executablePath) {
+            console.log('PDFService: No system Chrome found, using Puppeteer bundled Chrome');
+          }
+        }
+      }
+
       console.log('PDFService: Puppeteer config:', puppeteerConfig);
       
       browser = await puppeteer.launch(puppeteerConfig);
