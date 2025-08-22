@@ -47,6 +47,43 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test PDF endpoint (no auth required)
+app.post('/test-pdf-direct', async (req, res) => {
+  try {
+    console.log('DIRECT TEST PDF: Request received');
+    
+    const PDFService = require('./src/services/pdfService');
+    
+    // Simple test data
+    const testData = {
+      invoiceNumber: 'TEST-123',
+      customerInfo: { name: 'Test User', email: 'test@example.com' },
+      products: [
+        { name: 'Test Product', quantity: 1, rate: 100, totalAmount: 100 }
+      ],
+      totalCharges: 100,
+      gst: 18,
+      finalAmount: 118,
+      invoiceDate: '22/08/25'
+    };
+    
+    const pdfBuffer = await PDFService.generateInvoicePDF(testData);
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=test-invoice.pdf');
+    res.end(pdfBuffer);
+    
+  } catch (error) {
+    console.error('DIRECT TEST PDF Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Direct test PDF generation failed',
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
