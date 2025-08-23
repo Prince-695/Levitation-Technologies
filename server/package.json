@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npm install && npx puppeteer browsers install chrome && echo 'Build complete'",
-    "render-build": "npm install && npx puppeteer browsers install chrome",
+    "build": "pnpm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -33,5 +32,10 @@
     "mongoose": "^7.5.0",
     "nodemon": "^3.1.10",
     "puppeteer": "^21.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "puppeteer"
+    ]
   }
 }
